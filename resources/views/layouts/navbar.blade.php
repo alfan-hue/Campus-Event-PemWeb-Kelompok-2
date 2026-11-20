@@ -12,8 +12,19 @@
             @auth
                 <div class="d-flex align-items-center gap-2 me-2">
 
-                    <a href="" class="btn btn-outline-primary rounded-pill px-4 fw-bold fs-6">Dashboard</a>
-                    {{-- <a href="{{ route('dashboard') }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold fs-6">Dashboard</a> --}}
+                    {{-- <a href="" class="btn btn-outline-primary rounded-pill px-4 fw-bold fs-6">Dashboard</a> --}}
+                    {{-- <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-primary rounded-pill px-4 fw-bold fs-6">Dashboard</a> --}}
+                    @if (auth()->user()->is_admin)
+                        <a href="{{ route('admin.dashboard') }}"
+                        class="btn btn-outline-primary rounded-pill px-4 fw-bold fs-6">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="{{ route('organizer.dashboard') }}"
+                        class="btn btn-outline-primary rounded-pill px-4 fw-bold fs-6">
+                            Dashboard
+                        </a>
+                    @endif
 
                     {{-- add dropdown menu with logout option --}}
                     <div class="dropdown">
