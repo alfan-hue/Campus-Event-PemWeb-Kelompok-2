@@ -2,44 +2,17 @@
 
 @section('content')
 @php
-    // Sample data so the page renders on its own.
-    // In your controller, pass these variables, then delete this block.
-    $stats = $stats ?? ['events' => 48, 'ongoing' => 5, 'organizers' => 17, 'categories' => 6];
-
-    $recentEvents = $recentEvents ?? [
-        ['id' => 1, 'title' => 'Student Innovation Expo', 'organizer' => 'Faculty of Engineering', 'category' => 'Competition', 'status' => 'ongoing', 'date' => '18 Nov 2026'],
-        ['id' => 3, 'title' => 'Career Readiness Seminar', 'organizer' => 'Career Center', 'category' => 'Seminar', 'status' => 'upcoming', 'date' => '28 Nov 2026'],
-        ['id' => 4, 'title' => 'Intro to Web Development Workshop', 'organizer' => 'Informatics Student Association', 'category' => 'Workshop', 'status' => 'upcoming', 'date' => '03 Dec 2026'],
-        ['id' => 7, 'title' => 'New Student Orientation', 'organizer' => 'Student Affairs', 'category' => 'Seminar', 'status' => 'past', 'date' => '05 Nov 2026'],
-        ['id' => 8, 'title' => 'Open Mic Night', 'organizer' => 'Music Club', 'category' => 'Arts & Culture', 'status' => 'past', 'date' => '12 Nov 2026'],
-    ];
-
-    $categorySummary = $categorySummary ?? [
-        ['name' => 'Seminar', 'count' => 14],
-        ['name' => 'Workshop', 'count' => 11],
-        ['name' => 'Competition', 'count' => 8],
-        ['name' => 'Arts & Culture', 'count' => 7],
-        ['name' => 'Sports', 'count' => 5],
-        ['name' => 'Community Service', 'count' => 3],
-    ];
-
-    $recentOrganizers = $recentOrganizers ?? [
-        ['name' => 'Informatics Student Association', 'email' => 'hmif@campus.ac.id', 'events' => 6],
-        ['name' => 'Volunteer Club', 'email' => 'volunteer@campus.ac.id', 'events' => 3],
-        ['name' => 'Music Club', 'email' => 'music@campus.ac.id', 'events' => 2],
-    ];
-
+    // Status yang memang digunakan pada kolom events.status.
     $statusMap = [
-        'ongoing' => ['Ongoing', 'bg-success'],
-        'upcoming' => ['Upcoming', 'bg-primary'],
-        'past' => ['Ended', 'bg-secondary'],
+        'published' => ['Published', 'bg-success'],
+        'pending' => ['Pending review', 'bg-warning text-dark'],
     ];
 
-    $maxCount = max(1, collect($categorySummary)->max('count'));
+    $maxCount = max(1, (int) $categorySummary->max('events_count'));
 
     $statCards = [
         ['label' => 'Total events', 'value' => $stats['events'], 'icon' => 'bx-calendar-event'],
-        ['label' => 'Happening now', 'value' => $stats['ongoing'], 'icon' => 'bx-pulse'],
+        ['label' => 'Pending review', 'value' => $stats['pending'], 'icon' => 'bx-time-five'],
         ['label' => 'Organizers', 'value' => $stats['organizers'], 'icon' => 'bx-group'],
         ['label' => 'Categories', 'value' => $stats['categories'], 'icon' => 'bx-category'],
     ];
@@ -59,15 +32,15 @@
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
                     <div>
                         <h1 class="h3 fw-bold mb-1">Admin dashboard</h1>
-                        <p class="mb-0" style="opacity: .9;">Keep categories tidy and see what organizers are publishing.</p>
+                        <p class="mb-0" style="opacity: .9;">Monitor campus events, review submissions, and manage categories.</p>
                     </div>
-                    <a href="{{ url('/admin/categories/create') }}" class="btn btn-light text-primary fw-semibold">
+                    <a href="{{ route('admin.categories.create') }}" class="btn btn-light text-primary fw-semibold">
                         <i class='bx bx-plus align-middle'></i> Add category
                     </a>
                 </div>
             </div>
 
-            {{-- Stats --}}
+            {{-- Statistics --}}
             <div class="row g-3 mb-4">
                 @foreach ($statCards as $card)
                     <div class="col-6 col-xl-3">
@@ -94,7 +67,7 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h2 class="h5 fw-bold mb-0">Recent events</h2>
-                                <a href="{{ url('/admin/events') }}" class="small fw-semibold text-decoration-none">View all</a>
+                                <span class="small text-secondary">Latest submissions</span>
                             </div>
 
                             <div class="table-responsive">
@@ -105,29 +78,33 @@
                                             <th scope="col">Category</th>
                                             <th scope="col">Date</th>
                                             <th scope="col">Status</th>
-                                            <th scope="col" class="text-end">View</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse ($recentEvents as $event)
-                                            @php [$label, $class] = $statusMap[$event['status']] ?? $statusMap['upcoming']; @endphp
+                                            @php
+                                                [$label, $class] = $statusMap[$event->status] ?? ['Unknown', 'bg-secondary'];
+                                            @endphp
                                             <tr>
                                                 <td>
-                                                    <div class="fw-semibold">{{ $event['title'] }}</div>
-                                                    <div class="small text-secondary">{{ $event['organizer'] }}</div>
+                                                    <div class="fw-semibold">{{ $event->title }}</div>
+                                                    <div class="small text-secondary">{{ $event->organizer?->name ?? 'Unknown organizer' }}</div>
                                                 </td>
-                                                <td><span class="badge rounded-pill bg-primary bg-opacity-10 text-primary">{{ $event['category'] }}</span></td>
-                                                <td class="text-nowrap">{{ $event['date'] }}</td>
+                                                <td>
+                                                    <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary">
+                                                        {{ $event->category?->name ?? 'Uncategorized' }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-nowrap">
+                                                    {{ $event->date?->format('d M Y') ?? '—' }}
+                                                </td>
                                                 <td><span class="badge {{ $class }}">{{ $label }}</span></td>
-                                                <td class="text-end">
-                                                    <a href="{{ url('/events/' . $event['id']) }}" class="btn btn-sm btn-outline-primary" aria-label="View {{ $event['title'] }}">
-                                                        <i class='bx bx-show'></i>
-                                                    </a>
-                                                </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="5" class="text-center text-secondary py-4">No events have been published yet.</td>
+                                                <td colspan="4" class="text-center text-secondary py-4">
+                                                    No events have been submitted yet.
+                                                </td>
                                             </tr>
                                         @endforelse
                                     </tbody>
@@ -143,21 +120,25 @@
                         <div class="card-body p-4">
                             <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h2 class="h5 fw-bold mb-0">Events by category</h2>
-                                <a href="{{ url('/admin/categories') }}" class="small fw-semibold text-decoration-none">Manage</a>
+                                <a href="{{ route('admin.categories.index') }}" class="small fw-semibold text-decoration-none">Manage</a>
                             </div>
 
                             @forelse ($categorySummary as $item)
                                 <div class="mb-3">
                                     <div class="d-flex justify-content-between small mb-1">
-                                        <span class="fw-semibold">{{ $item['name'] }}</span>
-                                        <span class="text-secondary">{{ $item['count'] }}</span>
+                                        <span class="fw-semibold">{{ $item->name }}</span>
+                                        <span class="text-secondary">{{ $item->events_count }}</span>
                                     </div>
-                                    <div class="progress" style="height: .5rem;" role="progressbar" aria-label="{{ $item['name'] }}" aria-valuenow="{{ $item['count'] }}" aria-valuemin="0" aria-valuemax="{{ $maxCount }}">
-                                        <div class="progress-bar" style="width: {{ ($item['count'] / $maxCount) * 100 }}%"></div>
+                                    <div class="progress" style="height: .5rem;" role="progressbar"
+                                         aria-label="{{ $item->name }}"
+                                         aria-valuenow="{{ $item->events_count }}"
+                                         aria-valuemin="0"
+                                         aria-valuemax="{{ $maxCount }}">
+                                        <div class="progress-bar" style="width: {{ ($item->events_count / $maxCount) * 100 }}%"></div>
                                     </div>
                                 </div>
                             @empty
-                                <p class="text-secondary mb-0">No categories yet. Add one so organizers can tag their events.</p>
+                                <p class="text-secondary mb-0">No categories yet. Add one so organizers can classify their events.</p>
                             @endforelse
                         </div>
                     </div>
@@ -168,23 +149,30 @@
             <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h2 class="h5 fw-bold mb-0">New organizers</h2>
-                        <a href="{{ url('/admin/organizers') }}" class="small fw-semibold text-decoration-none">View all</a>
+                        <h2 class="h5 fw-bold mb-0">Recent organizers</h2>
+                        <span class="small text-secondary">Non-admin users</span>
                     </div>
 
                     <div class="list-group list-group-flush">
                         @forelse ($recentOrganizers as $organizer)
                             @php
-                                $initials = collect(preg_split('/\s+/', trim($organizer['name'])))
-                                    ->filter()->take(2)->map(fn ($w) => mb_strtoupper(mb_substr($w, 0, 1)))->implode('');
+                                $initials = collect(preg_split('/\s+/', trim($organizer->name)))
+                                    ->filter()
+                                    ->take(2)
+                                    ->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))
+                                    ->implode('');
                             @endphp
                             <div class="list-group-item px-0 d-flex align-items-center gap-3">
-                                <div class="icon-circle d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-bold">{{ $initials }}</div>
-                                <div class="flex-grow-1 min-w-0">
-                                    <div class="fw-semibold text-truncate">{{ $organizer['name'] }}</div>
-                                    <div class="small text-secondary text-truncate">{{ $organizer['email'] }}</div>
+                                <div class="icon-circle d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary fw-bold">
+                                    {{ $initials }}
                                 </div>
-                                <span class="badge rounded-pill bg-light text-dark border">{{ $organizer['events'] }} {{ \Illuminate\Support\Str::plural('event', $organizer['events']) }}</span>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="fw-semibold text-truncate">{{ $organizer->name }}</div>
+                                    <div class="small text-secondary text-truncate">{{ $organizer->email }}</div>
+                                </div>
+                                <span class="badge rounded-pill bg-light text-dark border">
+                                    {{ $organizer->events_count }} {{ \Illuminate\Support\Str::plural('event', $organizer->events_count) }}
+                                </span>
                             </div>
                         @empty
                             <p class="text-secondary mb-0">No organizers have registered yet.</p>

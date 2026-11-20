@@ -1,13 +1,19 @@
-{{--
-    Admin sidebar, shared by every admin_dashboard page.
-    Usage: @include('admin_dashboard.sidebar')
---}}
+{{-- Admin sidebar, shared by admin dashboard pages. --}}
 @php
+    // Only show links whose routes currently exist in routes/web.php.
     $adminNav = [
-        ['label' => 'Overview', 'icon' => 'bx-grid-alt', 'url' => url('/admin'), 'active' => request()->is('admin')],
-        ['label' => 'Events', 'icon' => 'bx-calendar-event', 'url' => url('/admin/events'), 'active' => request()->is('admin/events*')],
-        ['label' => 'Categories', 'icon' => 'bx-category', 'url' => url('/admin/categories'), 'active' => request()->is('admin/categories*')],
-        ['label' => 'Organizers', 'icon' => 'bx-group', 'url' => url('/admin/organizers'), 'active' => request()->is('admin/organizers*')],
+        [
+            'label' => 'Overview',
+            'icon' => 'bx-grid-alt',
+            'url' => route('admin.dashboard'),
+            'active' => request()->routeIs('admin.dashboard'),
+        ],
+        [
+            'label' => 'Categories',
+            'icon' => 'bx-category',
+            'url' => route('admin.categories.index'),
+            'active' => request()->routeIs('admin.categories.*'),
+        ],
     ];
 @endphp
 
@@ -43,7 +49,9 @@
 
         <nav class="nav flex-nowrap flex-lg-column overflow-auto dash-nav gap-1" aria-label="Admin navigation">
             @foreach ($adminNav as $item)
-                <a href="{{ $item['url'] }}" class="nav-link {{ $item['active'] ? 'active' : '' }}" @if ($item['active']) aria-current="page" @endif>
+                <a href="{{ $item['url'] }}"
+                   class="nav-link {{ $item['active'] ? 'active' : '' }}"
+                   @if ($item['active']) aria-current="page" @endif>
                     <i class='bx {{ $item['icon'] }}'></i> {{ $item['label'] }}
                 </a>
             @endforeach
