@@ -1,10 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-@php
-    // Pass $categories from your controller (list of category names), then delete this line.
-    $categories = $categories ?? ['Seminar', 'Workshop', 'Competition', 'Sports', 'Arts & Culture', 'Community Service'];
-@endphp
 
 <div class="container py-4">
     <div class="row g-4">

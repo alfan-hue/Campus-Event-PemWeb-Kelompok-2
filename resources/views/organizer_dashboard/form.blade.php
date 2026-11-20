@@ -10,8 +10,9 @@
         ])
 --}}
 @php
-    $event = $event ?? [];
-    $currentImage = $event['image'] ?? null;
+    $currentImage = $event?->poster
+        ? asset('storage/' . $event->poster)
+        : null;
 @endphp
 
 <form method="POST" action="{{ $action }}" enctype="multipart/form-data" novalidate>
@@ -32,7 +33,7 @@
                         <label for="title" class="form-label fw-semibold">Title</label>
                         <input id="title" type="text" name="title" maxlength="120" required
                                class="form-control form-control-lg @error('title') is-invalid @enderror"
-                               value="{{ old('title', $event['title'] ?? '') }}"
+                               value="{{ old('title', $event->title ?? '') }}"
                                placeholder="For example, Intro to Web Development Workshop">
                         @error('title')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -44,7 +45,7 @@
                         <select id="category" name="category" required class="form-select @error('category') is-invalid @enderror">
                             <option value="">Choose a category</option>
                             @foreach ($categories as $category)
-                                <option value="{{ $category }}" @selected(old('category', $event['category'] ?? '') === $category)>{{ $category }}</option>
+                                <option value="{{ $category }}" @selected(old('category', $event?->category?->name ?? '') === $category)>{{ $category }}</option>
                             @endforeach
                         </select>
                         @error('category')
@@ -56,7 +57,7 @@
                         <label for="description" class="form-label fw-semibold">Description</label>
                         <textarea id="description" name="description" rows="6" maxlength="1000" required
                                   class="form-control @error('description') is-invalid @enderror"
-                                  placeholder="What happens, who it is for, and what to bring.">{{ old('description', $event['description'] ?? '') }}</textarea>
+                                  placeholder="What happens, who it is for, and what to bring.">{{ old('description', $event->description ?? '') }}</textarea>
                         <div class="d-flex justify-content-between">
                             <div class="form-text">Start with the key facts. Event cards show only the first lines.</div>
                             <div class="form-text"><span id="descCount">0</span>/1000</div>
@@ -71,7 +72,7 @@
                             <label for="start_date" class="form-label fw-semibold">Start date</label>
                             <input id="start_date" type="date" name="start_date" required
                                    class="form-control @error('start_date') is-invalid @enderror"
-                                   value="{{ old('start_date', $event['start_date'] ?? '') }}">
+                                   value="{{ old('start_date', $event?->start_date?->format('Y-m-d') ?? '') }}">
                             @error('start_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -80,7 +81,7 @@
                             <label for="end_date" class="form-label fw-semibold">End date</label>
                             <input id="end_date" type="date" name="end_date" required
                                    class="form-control @error('end_date') is-invalid @enderror"
-                                   value="{{ old('end_date', $event['end_date'] ?? '') }}">
+                                   value="{{ old('end_date', $event?->end_date?->format('Y-m-d') ?? '') }}">
                             @error('end_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -89,7 +90,7 @@
                             <label for="start_time" class="form-label fw-semibold">Start time</label>
                             <input id="start_time" type="time" name="start_time" required
                                    class="form-control @error('start_time') is-invalid @enderror"
-                                   value="{{ old('start_time', $event['start_time'] ?? '') }}">
+                                   value="{{ old('start_time', $event->start_time ?? '') }}">
                             @error('start_time')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -98,7 +99,7 @@
                             <label for="end_time" class="form-label fw-semibold">End time</label>
                             <input id="end_time" type="time" name="end_time" required
                                    class="form-control @error('end_time') is-invalid @enderror"
-                                   value="{{ old('end_time', $event['end_time'] ?? '') }}">
+                                   value="{{ old('end_time', $event->end_time ?? '') }}">
                             @error('end_time')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -109,7 +110,7 @@
                         <label for="location" class="form-label fw-semibold">Location</label>
                         <input id="location" type="text" name="location" maxlength="150" required
                                class="form-control @error('location') is-invalid @enderror"
-                               value="{{ old('location', $event['location'] ?? '') }}"
+                               value="{{ old('location', $event->location ?? '') }}"
                                placeholder="Building and room, or a clear meeting point">
                         @error('location')
                             <div class="invalid-feedback">{{ $message }}</div>
@@ -149,7 +150,7 @@
                     <label for="registration_url" class="form-label fw-semibold">Registration link</label>
                     <input id="registration_url" type="url" name="registration_url" required
                            class="form-control @error('registration_url') is-invalid @enderror"
-                           value="{{ old('registration_url', $event['registration_url'] ?? '') }}"
+                           value="{{ old('registration_url', $event->registration_url ?? '') }}"
                            placeholder="https://">
                     <div class="form-text">Students open this link when they select Register. Test it before you publish.</div>
                     @error('registration_url')

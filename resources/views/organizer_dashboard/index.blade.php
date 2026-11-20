@@ -4,13 +4,19 @@
 @php
     // Sample data so the page renders on its own.
     // In your controller, pass $myEvents (the logged-in organizer's events), then delete this block.
-    $myEvents = $myEvents ?? [
-        ['id' => 1, 'title' => 'Student Innovation Expo', 'category' => 'Competition', 'status' => 'ongoing', 'date' => '18 – 22 Nov 2026', 'registration_url' => 'https://example.com/register/innovation-expo', 'image' => null],
-        ['id' => 3, 'title' => 'Career Readiness Seminar', 'category' => 'Seminar', 'status' => 'upcoming', 'date' => '28 Nov 2026', 'registration_url' => 'https://example.com/register/career-seminar', 'image' => null],
-        ['id' => 4, 'title' => 'Intro to Web Development Workshop', 'category' => 'Workshop', 'status' => 'upcoming', 'date' => '03 Dec 2026', 'registration_url' => 'https://example.com/register/web-workshop', 'image' => null],
-        ['id' => 7, 'title' => 'New Student Orientation', 'category' => 'Seminar', 'status' => 'past', 'date' => '05 Nov 2026', 'registration_url' => 'https://example.com/register/orientation', 'image' => null],
+    $statusMap = [
+        'ongoing' => ['Ongoing', 'bg-success'],
+        'upcoming' => ['Upcoming', 'bg-primary'],
+        'past' => ['Ended', 'bg-secondary'],
     ];
 
+    $events = collect($myEvents);
+    $counts = [
+        'all' => $events->count(),
+        'ongoing' => $events->where('status', 'ongoing')->count(),
+        'upcoming' => $events->where('status', 'upcoming')->count(),
+        'past' => $events->where('status', 'past')->count(),
+    ];
     $statusMap = [
         'ongoing' => ['Ongoing', 'bg-success'],
         'upcoming' => ['Upcoming', 'bg-primary'],

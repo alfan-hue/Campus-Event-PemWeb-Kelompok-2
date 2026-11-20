@@ -12,6 +12,10 @@ class Event extends Model
         'title',
         'description',
         'date',
+        'start_date',
+        'end_date',
+        'start_time',
+        'end_time',
         'location',
         'poster',
         'registration_url',
@@ -22,6 +26,8 @@ class Event extends Model
     {
         return [
             'date' => 'date',
+            'start_date' => 'date',
+            'end_date' => 'date',
         ];
     }
 
