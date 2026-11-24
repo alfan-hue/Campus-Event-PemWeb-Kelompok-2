@@ -55,8 +55,10 @@
             <a href="{{ url('/events/' . $event['id']) }}" class="btn btn-outline-primary btn-sm flex-fill">View details</a>
             @if ($isPast)
                 <span class="btn btn-outline-secondary btn-sm flex-fill disabled">Ended</span>
-            @else
+            @elseif (!empty($event['registration_url']))
                 <a href="{{ $event['registration_url'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm flex-fill">Register</a>
+            @else
+                <span class="btn btn-outline-secondary btn-sm flex-fill disabled">No link</span>
             @endif
         </div>
     </div>

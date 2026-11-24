@@ -2,28 +2,8 @@
 
 @section('content')
 @php
-    // Sample data so the page renders on its own.
-    // In your controller, pass $events (array, collection or paginator) and $categories, then delete this block.
-    $categories = $categories ?? ['Seminar', 'Workshop', 'Competition', 'Sports', 'Arts & Culture', 'Community Service'];
-
-    $sampleEvents = [
-        ['id' => 1, 'title' => 'Student Innovation Expo', 'category' => 'Competition', 'status' => 'ongoing', 'date' => '18 – 22 Nov 2026', 'time' => '09:00 – 17:00', 'location' => 'Main Hall, Building A', 'organizer' => 'Faculty of Engineering', 'description' => 'Showcase of student projects from every department, with live demos and judging.', 'registration_url' => 'https://example.com/register/innovation-expo'],
-        ['id' => 2, 'title' => 'Campus Art Week', 'category' => 'Arts & Culture', 'status' => 'ongoing', 'date' => '16 – 22 Nov 2026', 'time' => '10:00 – 20:00', 'location' => 'Central Courtyard', 'organizer' => 'Arts Student Union', 'description' => 'Exhibitions, live performances, and open studios by student artists.', 'registration_url' => 'https://example.com/register/art-week'],
-        ['id' => 3, 'title' => 'Career Readiness Seminar', 'category' => 'Seminar', 'status' => 'upcoming', 'date' => '28 Nov 2026', 'time' => '13:00 – 15:30', 'location' => 'Auditorium', 'organizer' => 'Career Center', 'description' => 'Learn CV writing, interview skills, and how to approach employers.', 'registration_url' => 'https://example.com/register/career-seminar'],
-        ['id' => 4, 'title' => 'Intro to Web Development Workshop', 'category' => 'Workshop', 'status' => 'upcoming', 'date' => '03 Dec 2026', 'time' => '09:00 – 12:00', 'location' => 'Computer Lab 2', 'organizer' => 'Informatics Student Association', 'description' => 'Hands-on beginner workshop covering HTML, CSS, and your first Laravel page.', 'registration_url' => 'https://example.com/register/web-workshop'],
-        ['id' => 5, 'title' => 'Inter-Faculty Futsal Cup', 'category' => 'Sports', 'status' => 'upcoming', 'date' => '10 Dec 2026', 'time' => '08:00 – 16:00', 'location' => 'Sports Hall', 'organizer' => 'Sports Committee', 'description' => 'Annual futsal tournament. Teams of 7, registration closes one week before.', 'registration_url' => 'https://example.com/register/futsal-cup'],
-        ['id' => 6, 'title' => 'Beach Clean-Up Day', 'category' => 'Community Service', 'status' => 'upcoming', 'date' => '13 Dec 2026', 'time' => '06:30 – 11:00', 'location' => 'Meeting point: Campus Gate', 'organizer' => 'Volunteer Club', 'description' => 'Join fellow students for a morning of community service. Transport provided.', 'registration_url' => 'https://example.com/register/clean-up'],
-        ['id' => 7, 'title' => 'New Student Orientation', 'category' => 'Seminar', 'status' => 'past', 'date' => '05 Nov 2026', 'time' => '08:00 – 14:00', 'location' => 'Auditorium', 'organizer' => 'Student Affairs', 'description' => 'A full-day welcome covering campus services, clubs, and academic tips for new students.', 'registration_url' => 'https://example.com/register/orientation'],
-        ['id' => 8, 'title' => 'Open Mic Night', 'category' => 'Arts & Culture', 'status' => 'past', 'date' => '12 Nov 2026', 'time' => '19:00 – 22:00', 'location' => 'Student Cafe', 'organizer' => 'Music Club', 'description' => 'An evening of music, poetry, and stand-up from student performers.', 'registration_url' => 'https://example.com/register/open-mic'],
-    ];
-
-    // Filters the sample data by the search form so the page can be previewed.
-    $events = $events ?? collect($sampleEvents)
-        ->when(request('q'), fn ($c, $q) => $c->filter(fn ($e) => str_contains(mb_strtolower($e['title'] . ' ' . $e['description']), mb_strtolower($q))))
-        ->when(request('category'), fn ($c, $cat) => $c->where('category', $cat))
-        ->when(request('status'), fn ($c, $s) => $c->where('status', $s))
-        ->values()
-        ->all();
+    $categories = $categories ?? [];
+    $events = $events ?? [];
 
     $isPaginated = $events instanceof \Illuminate\Pagination\LengthAwarePaginator;
     $total = $isPaginated ? $events->total() : count($events);

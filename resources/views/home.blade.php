@@ -1,79 +1,9 @@
 @php
-    $categories = $categories ?? ['Seminar', 'Workshop', 'Competition', 'Sports', 'Arts & Culture', 'Community Service'];
+    $categories = $categories ?? [];
+    $ongoingEvents = $ongoingEvents ?? [];
+    $upcomingEvents = $upcomingEvents ?? [];
 
-    $ongoingEvents = $ongoingEvents ?? [
-        [
-            'id' => 1,
-            'title' => 'Student Innovation Expo',
-            'category' => 'Competition',
-            'date' => '10 – 12 Oct 2026',
-            'time' => '09:00 – 17:00',
-            'location' => 'Main Hall, Building A',
-            'organizer' => 'Faculty of Engineering',
-            'description' => 'Showcase of student projects from every department, with live demos and judging.',
-            'registration_url' => 'https://example.com/register/innovation-expo',
-        ],
-        [
-            'id' => 2,
-            'title' => 'Campus Art Week',
-            'category' => 'Arts & Culture',
-            'date' => '08 – 14 Oct 2026',
-            'time' => '10:00 – 20:00',
-            'location' => 'Central Courtyard',
-            'organizer' => 'Arts Student Union',
-            'description' => 'Exhibitions, live performances, and open studios by student artists.',
-            'registration_url' => 'https://example.com/register/art-week',
-        ],
-    ];
-
-    $upcomingEvents = $upcomingEvents ?? [
-        [
-            'id' => 3,
-            'title' => 'Career Readiness Seminar',
-            'category' => 'Seminar',
-            'date' => '18 Oct 2026',
-            'time' => '13:00 – 15:30',
-            'location' => 'Auditorium',
-            'organizer' => 'Career Center',
-            'description' => 'Learn CV writing, interview skills, and how to approach employers.',
-            'registration_url' => 'https://example.com/register/career-seminar',
-        ],
-        [
-            'id' => 4,
-            'title' => 'Intro to Web Development Workshop',
-            'category' => 'Workshop',
-            'date' => '22 Oct 2026',
-            'time' => '09:00 – 12:00',
-            'location' => 'Computer Lab 2',
-            'organizer' => 'Informatics Student Association',
-            'description' => 'Hands-on beginner workshop covering HTML, CSS, and your first Laravel page.',
-            'registration_url' => 'https://example.com/register/web-workshop',
-        ],
-        [
-            'id' => 5,
-            'title' => 'Inter-Faculty Futsal Cup',
-            'category' => 'Sports',
-            'date' => '29 Oct 2026',
-            'time' => '08:00 – 16:00',
-            'location' => 'Sports Hall',
-            'organizer' => 'Sports Committee',
-            'description' => 'Annual futsal tournament. Teams of 7, registration closes one week before.',
-            'registration_url' => 'https://example.com/register/futsal-cup',
-        ],
-        [
-            'id' => 6,
-            'title' => 'Beach Clean-Up Day',
-            'category' => 'Community Service',
-            'date' => '01 Nov 2026',
-            'time' => '06:30 – 11:00',
-            'location' => 'Meeting point: Campus Gate',
-            'organizer' => 'Volunteer Club',
-            'description' => 'Join fellow students for a morning of community service. Transport provided.',
-            'registration_url' => 'https://example.com/register/clean-up',
-        ],
-    ];
-
-    $sections = [
+    $sections = $sections ?? [
         ['title' => 'Happening Now', 'subtitle' => 'Ongoing events you can join today.', 'badge' => 'Ongoing', 'badgeClass' => 'bg-success', 'events' => $ongoingEvents],
         ['title' => 'Upcoming Events', 'subtitle' => 'Mark your calendar for what is coming next.', 'badge' => 'Upcoming', 'badgeClass' => 'bg-primary', 'events' => $upcomingEvents],
     ];
@@ -180,7 +110,11 @@
 
                                     <div class="d-flex gap-2">
                                         <a href="{{ url('/events/' . $event['id']) }}" class="btn btn-outline-primary btn-sm flex-fill">View details</a>
-                                        <a href="{{ $event['registration_url'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm flex-fill">Register</a>
+                                        @if (!empty($event['registration_url']))
+                                            <a href="{{ $event['registration_url'] }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-sm flex-fill">Register</a>
+                                        @else
+                                            <span class="btn btn-outline-secondary btn-sm flex-fill disabled">No link</span>
+                                        @endif
                                     </div>
                                 </div>
                             </article>
