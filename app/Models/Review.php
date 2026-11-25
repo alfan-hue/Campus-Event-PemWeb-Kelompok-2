@@ -10,7 +10,7 @@ class Review extends Model
         'event_id',
         'user_id',
         'content',
-        'rating',
+        'rating', // 'L' = like, 'D' = dislike, null = comment only
     ];
 
     public function event()

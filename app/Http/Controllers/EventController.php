@@ -127,7 +127,7 @@ class EventController extends Controller
     }
 
     // GET /events/{event}  (view: event.show)
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $eventModel = Event::with(['category', 'organizer'])
             ->where('status', 'published')
@@ -211,7 +211,41 @@ class EventController extends Controller
             })
             ->all();
 
-        return view('event.show', compact('event', 'relatedEvents'));
+        // ---- Reviews ----
+        $reviewFilter = $request->query('filter');
+
+        $reviewsQuery = $eventModel->reviews()->with('user')->latest();
+
+        match ($reviewFilter) {
+            'positive' => $reviewsQuery->where('rating', 'L'),
+            'negative' => $reviewsQuery->where('rating', 'D'),
+            'neutral'  => $reviewsQuery->whereNull('rating'),
+            default    => null,
+        };
+
+        $reviews = $reviewsQuery->paginate(10)->withQueryString();
+
+        $counts = $eventModel->reviews()
+            ->selectRaw('COUNT(*) as total')
+            ->selectRaw("SUM(CASE WHEN rating = 'L' THEN 1 ELSE 0 END) as positive")
+            ->selectRaw("SUM(CASE WHEN rating = 'D' THEN 1 ELSE 0 END) as negative")
+            ->first();
+
+        $reviewStats = [
+            'total'    => (int) $counts->total,
+            'positive' => (int) $counts->positive,
+            'negative' => (int) $counts->negative,
+        ];
+
+        $myReview = $request->user()
+            ? $eventModel->reviews()->where('user_id', $request->user()->id)->first()
+            : null;
+
+        $canReview = $timingStatus !== 'upcoming';
+
+        return view('event.show', compact(
+            'event', 'relatedEvents', 'reviews', 'reviewStats', 'myReview', 'reviewFilter', 'canReview'
+        ));
     }
 }
 

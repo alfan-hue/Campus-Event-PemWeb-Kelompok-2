@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\ReviewController; // <-- added
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\AdminCategoryController;
 use App\Http\Controllers\OrganizerDashboardController;
@@ -30,6 +31,10 @@ Route::middleware('auth')->group(function () {
         Route::put('/profile', 'update')->name('profile.update');
         Route::put('/profile/password', 'updatePassword')->name('profile.password');
     });
+
+    // Event reviews (logged-in users only)  <-- added
+    Route::post('/events/{event}/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+    Route::delete('/events/{event}/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 
     // Admin area: only users with is_admin = true (Gate "admin", see AppServiceProvider)
     Route::prefix('admin')->name('admin.')->middleware('can:admin')->group(function () {
