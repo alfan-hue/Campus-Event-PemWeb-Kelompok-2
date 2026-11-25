@@ -24,8 +24,8 @@ class HomeController extends Controller
             $keyword = $request->input('q');
             $baseQuery->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%{$keyword}%")
-                  ->orWhere('description', 'like', "%{$keyword}%")
-                  ->orWhere('location', 'like', "%{$keyword}%");
+                    ->orWhere('description', 'like', "%{$keyword}%")
+                    ->orWhere('location', 'like', "%{$keyword}%");
             });
         }
 
@@ -46,7 +46,7 @@ class HomeController extends Controller
                     ->where('start_date', '<=', $today)
                     ->where(function ($endSub) use ($today) {
                         $endSub->whereNull('end_date')
-                               ->orWhere('end_date', '>=', $today);
+                            ->orWhere('end_date', '>=', $today);
                     });
             })->orWhere(function ($sub) use ($today) {
                 $sub->whereNull('start_date')
@@ -113,18 +113,17 @@ class HomeController extends Controller
                 'subtitle' => 'Ongoing events you can join today.',
                 'badge' => 'Ongoing',
                 'badgeClass' => 'bg-success',
-                'events' => $ongoingEvents
+                'events' => $ongoingEvents,
             ],
             [
                 'title' => 'Upcoming Events',
                 'subtitle' => 'Mark your calendar for what is coming next.',
                 'badge' => 'Upcoming',
                 'badgeClass' => 'bg-primary',
-                'events' => $upcomingEvents
+                'events' => $upcomingEvents,
             ],
         ];
 
         return view('home', compact('categories', 'sections', 'ongoingEvents', 'upcomingEvents'));
     }
 }
-
