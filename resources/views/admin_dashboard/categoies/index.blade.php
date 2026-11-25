@@ -1,19 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-@php
-    // Sample data so the page renders on its own.
-    // In your controller, pass $categories (array, collection or paginator), then delete this block.
-    $categories = $categories ?? [
-        ['id' => 1, 'name' => 'Seminar', 'slug' => 'seminar', 'events_count' => 14, 'is_active' => true, 'created_at' => '02 Sep 2026'],
-        ['id' => 2, 'name' => 'Workshop', 'slug' => 'workshop', 'events_count' => 11, 'is_active' => true, 'created_at' => '02 Sep 2026'],
-        ['id' => 3, 'name' => 'Competition', 'slug' => 'competition', 'events_count' => 8, 'is_active' => true, 'created_at' => '02 Sep 2026'],
-        ['id' => 4, 'name' => 'Sports', 'slug' => 'sports', 'events_count' => 5, 'is_active' => true, 'created_at' => '09 Sep 2026'],
-        ['id' => 5, 'name' => 'Arts & Culture', 'slug' => 'arts-culture', 'events_count' => 7, 'is_active' => true, 'created_at' => '09 Sep 2026'],
-        ['id' => 6, 'name' => 'Community Service', 'slug' => 'community-service', 'events_count' => 3, 'is_active' => false, 'created_at' => '21 Sep 2026'],
-    ];
-@endphp
-
 <div class="container py-4">
     <div class="row g-4">
 
@@ -29,7 +16,7 @@
                     <h1 class="h3 fw-bold mb-1">Categories</h1>
                     <p class="text-secondary mb-0">Organizers pick one of these when they add an event, and students use them to filter.</p>
                 </div>
-                <a href="{{ url('/admin/categories/create') }}" class="btn btn-primary">
+                <a href="{{ route('admin.categories.create') }}" class="btn btn-primary">
                     <i class='bx bx-plus align-middle'></i> Add category
                 </a>
             </div>
@@ -37,6 +24,13 @@
             @if (session('success'))
                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                     {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             @endif
@@ -51,7 +45,9 @@
                             <i class='bx bx-search position-absolute top-50 translate-middle-y text-secondary' style="left: .75rem;"></i>
                             <input type="search" id="categorySearch" class="form-control" style="padding-left: 2.25rem;" placeholder="Search categories">
                         </div>
-                        <span class="small text-secondary" id="categoryCount" aria-live="polite">{{ count($categories) }} {{ \Illuminate\Support\Str::plural('category', count($categories)) }}</span>
+                        <span class="small text-secondary" id="categoryCount" aria-live="polite">
+                            {{ $categories->count() }} {{ \Illuminate\Support\Str::plural('category', $categories->count()) }}
+                        </span>
                     </div>
 
                     <div class="table-responsive">
@@ -68,28 +64,28 @@
                             </thead>
                             <tbody id="categoryRows">
                                 @foreach ($categories as $category)
-                                    <tr class="category-row" data-name="{{ mb_strtolower($category['name']) }}">
-                                        <td class="fw-semibold">{{ $category['name'] }}</td>
-                                        <td><code>{{ $category['slug'] }}</code></td>
-                                        <td class="text-center">{{ $category['events_count'] }}</td>
+                                    <tr class="category-row" data-name="{{ mb_strtolower($category->name) }}">
+                                        <td class="fw-semibold">{{ $category->name }}</td>
+                                        <td><code>{{ $category->slug }}</code></td>
+                                        <td class="text-center">{{ $category->events_count }}</td>
                                         <td>
-                                            @if ($category['is_active'])
+                                            @if ($category->is_active)
                                                 <span class="badge bg-success bg-opacity-10 text-success">Active</span>
                                             @else
                                                 <span class="badge bg-secondary bg-opacity-10 text-secondary">Hidden</span>
                                             @endif
                                         </td>
-                                        <td class="text-nowrap text-secondary">{{ $category['created_at'] }}</td>
+                                        <td class="text-nowrap text-secondary">{{ $category->created_at?->format('d M Y') }}</td>
                                         <td class="text-end text-nowrap">
-                                            <a href="{{ url('/admin/categories/' . $category['id'] . '/edit') }}" class="btn btn-sm btn-outline-primary" aria-label="Edit {{ $category['name'] }}">
+                                            <a href="{{ route('admin.categories.edit', $category) }}" class="btn btn-sm btn-outline-primary" aria-label="Edit {{ $category->name }}">
                                                 <i class='bx bx-edit'></i>
                                             </a>
                                             <button type="button" class="btn btn-sm btn-outline-danger btn-delete"
                                                     data-bs-toggle="modal" data-bs-target="#deleteModal"
-                                                    data-action="{{ url('/admin/categories/' . $category['id']) }}"
-                                                    data-name="{{ $category['name'] }}"
-                                                    data-count="{{ $category['events_count'] }}"
-                                                    aria-label="Delete {{ $category['name'] }}">
+                                                    data-action="{{ route('admin.categories.destroy', $category) }}"
+                                                    data-name="{{ $category->name }}"
+                                                    data-count="{{ $category->events_count }}"
+                                                    aria-label="Delete {{ $category->name }}">
                                                 <i class='bx bx-trash'></i>
                                             </button>
                                         </td>
@@ -101,13 +97,13 @@
                                     <td colspan="6" class="text-center text-secondary py-4">No category matches your search.</td>
                                 </tr>
 
-                                @if (count($categories) === 0)
+                                @if ($categories->isEmpty())
                                     <tr>
                                         <td colspan="6" class="text-center py-5">
                                             <i class='bx bx-category fs-1 text-primary'></i>
                                             <p class="fw-semibold mb-1">No categories yet</p>
                                             <p class="text-secondary mb-3">Add your first category so organizers can tag their events.</p>
-                                            <a href="{{ url('/admin/categories/create') }}" class="btn btn-primary btn-sm">Add category</a>
+                                            <a href="{{ route('admin.categories.create') }}" class="btn btn-primary btn-sm">Add category</a>
                                         </td>
                                     </tr>
                                 @endif
@@ -147,12 +143,10 @@
 </div>
 
 <script>
-    // Wait for the page to load so jQuery (from layouts/app.blade.php) is ready.
     window.addEventListener('load', function () {
         (function ($) {
             if (!$) { return; }
 
-            // Live search
             $('#categorySearch').on('input', function () {
                 var term = $.trim($(this).val()).toLowerCase();
                 var visible = 0;
@@ -167,7 +161,6 @@
                 $('#categoryCount').text(visible + (visible === 1 ? ' category' : ' categories'));
             });
 
-            // Fill the delete modal with the clicked category
             $('.btn-delete').on('click', function () {
                 var count = parseInt($(this).data('count'), 10) || 0;
 

@@ -134,7 +134,10 @@
                                          aria-valuenow="{{ $item->events_count }}"
                                          aria-valuemin="0"
                                          aria-valuemax="{{ $maxCount }}">
-                                        <div class="progress-bar" style="width: {{ ($item->events_count / $maxCount) * 100 }}%"></div>
+                                        @php
+    $pct = ($maxCount ?? 0) > 0 ? (($item->events_count / $maxCount) * 100) : 0;
+@endphp
+<div class="progress-bar" style="width: {{ $pct }}%"></div>
                                     </div>
                                 </div>
                             @empty
