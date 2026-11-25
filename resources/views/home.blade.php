@@ -1,11 +1,40 @@
 @php
-    $categories = $categories ?? [];
-    $ongoingEvents = $ongoingEvents ?? [];
-    $upcomingEvents = $upcomingEvents ?? [];
+    $defaultCategories = ['Seminar', 'Workshop', 'Competition', 'Sports', 'Arts & Culture', 'Community Service'];
+
+    $rawCategories = isset($categories) && collect($categories)->isNotEmpty()
+        ? $categories
+        : $defaultCategories;
+
+    $categoryItems = collect($rawCategories)->map(function ($item) {
+        if (is_object($item)) {
+            $name = (string) ($item->name ?? '');
+            return [
+                'name' => $name,
+                'slug' => (string) ($item->slug ?? \Illuminate\Support\Str::slug($name)),
+            ];
+        }
+
+        if (is_array($item)) {
+            $name = (string) ($item['name'] ?? '');
+            return [
+                'name' => $name,
+                'slug' => (string) ($item['slug'] ?? \Illuminate\Support\Str::slug($name)),
+            ];
+        }
+
+        $name = (string) $item;
+        return [
+            'name' => $name,
+            'slug' => \Illuminate\Support\Str::slug($name),
+        ];
+    })->filter(fn ($cat) => $cat['name'] !== '')->values();
+
+    $ongoingList = $ongoingEvents ?? [];
+    $upcomingList = $upcomingEvents ?? [];
 
     $sections = $sections ?? [
-        ['title' => 'Happening Now', 'subtitle' => 'Ongoing events you can join today.', 'badge' => 'Ongoing', 'badgeClass' => 'bg-success', 'events' => $ongoingEvents],
-        ['title' => 'Upcoming Events', 'subtitle' => 'Mark your calendar for what is coming next.', 'badge' => 'Upcoming', 'badgeClass' => 'bg-primary', 'events' => $upcomingEvents],
+        ['title' => 'Happening Now', 'subtitle' => 'Ongoing events you can join today.', 'badge' => 'Ongoing', 'badgeClass' => 'bg-success', 'events' => $ongoingList],
+        ['title' => 'Upcoming Events', 'subtitle' => 'Mark your calendar for what is coming next.', 'badge' => 'Upcoming', 'badgeClass' => 'bg-primary', 'events' => $upcomingList],
     ];
 @endphp
 
@@ -33,8 +62,10 @@
                         <label for="category" class="visually-hidden">Category</label>
                         <select id="category" name="category" class="form-select form-select-lg">
                             <option value="">All categories</option>
-                            @foreach ($categories as $category)
-                                <option value="{{ $category }}" @selected(request('category') === $category)>{{ $category }}</option>
+                            @foreach ($categoryItems as $category)
+                                <option value="{{ $category['name'] }}" @selected(request('category') === $category['name'] || request('category') === $category['slug'])>
+                                    {{ $category['name'] }}
+                                </option>
                             @endforeach
                         </select>
                     </div>
@@ -52,11 +83,19 @@
         <section class="mb-5" aria-label="Browse by category">
             <h2 class="h5 fw-semibold mb-3">Browse by category</h2>
             <div class="d-flex flex-wrap gap-2">
-                <a href="{{ url('/') }}" class="btn btn-sm rounded-pill {{ request('category') ? 'btn-outline-primary' : 'btn-primary' }}">All</a>
-                @foreach ($categories as $category)
-                    <a href="{{ url('/') }}?category={{ urlencode($category) }}"
-                    class="btn btn-sm rounded-pill {{ request('category') === $category ? 'btn-primary' : 'btn-outline-primary' }}">
-                        {{ $category }}
+                <a href="{{ url('/') }}{{ request('q') ? '?q=' . urlencode(request('q')) : '' }}"
+                   class="btn btn-sm rounded-pill {{ request('category') ? 'btn-outline-primary' : 'btn-primary' }}">All</a>
+                @foreach ($categoryItems as $category)
+                    @php
+                        $isActive = request('category') === $category['name'] || request('category') === $category['slug'];
+                        $queryParams = array_filter([
+                            'category' => $category['name'],
+                            'q' => request('q'),
+                        ]);
+                    @endphp
+                    <a href="{{ url('/') . '?' . http_build_query($queryParams) }}"
+                       class="btn btn-sm rounded-pill {{ $isActive ? 'btn-primary' : 'btn-outline-primary' }}">
+                        {{ $category['name'] }}
                     </a>
                 @endforeach
             </div>
